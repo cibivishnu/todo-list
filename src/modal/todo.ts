@@ -24,7 +24,7 @@ export class Todo {
     @Column('datetime', {nullable: true})
     deadline: Date;
 
-    @ManyToOne(() => User, {eager: true})
+    @ManyToOne(() => User)
     @JoinColumn({name: 'user'})
     user:User;
 } 

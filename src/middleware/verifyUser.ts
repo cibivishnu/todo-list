@@ -4,11 +4,7 @@ import { User } from '../modal/user';
 import { redisClient } from '../config/redis';
 
 const userRepo = datasource.getRepository(User);
-export const verifyUser = async(req: Request, res: Response, next: NextFunction) => {    
-    if (req.originalUrl.includes('signup')) {
-        next();
-        return;
-    }
+export const verifyUser = async(req: Request, res: Response, next: NextFunction) => {
     if (!req.headers.authorization) {
         res.status(401).send();
         return;

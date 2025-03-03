@@ -1,28 +1,30 @@
-import { Router } from 'express';
+import { Request, Response, Router } from 'express';
 import { User } from '../modal/user';
-import { datasource } from '../config/datasource';
-import { logger } from '../config/logger';
+import { UserService } from '../service/user-service';
+import { createUserValidator } from '../middleware/userRequestValidator';
+import { handleValidationErrors } from '../middleware/validationMiddleware';
 
 export const router = Router();
-const userRepo = datasource.getRepository(User);
+const userService = new UserService();
 
 router.route('/')
-    .get((req, res) => {
+    .get((req: Request, res: Response) => {
         res.send(req.body.user)
     })
-    .delete(async(req, res) => {
-        const user = await userRepo.delete({ id: req.body.user.id })
-        if (user.affected) {
+    .delete(async(req: Request, res: Response) => {
+        if (await userService.deleteUser(req.body.user)) {
+            res.status(200).send();
+        } else {
             res.status(400).send();
-            logger.error('Invalid id received to delete user=> id:' + req.body.user.id)
-            return;
         }
-        res.status(200).send();
-        
     })
 
-router.post('/signup', async(req, res) => {
-    const user = new User();
-    user .name = req.body.name;
-    res.send(await userRepo.save(user))
-})
+router.route('/signup')
+    .post(createUserValidator, handleValidationErrors, async(req: Request, res: Response) => {
+        const user = await userService.createUser(req.body.name);
+        if (user instanceof User) {
+            res.status(201).send(user);
+        } else {
+            res.status(400).send(user);
+        }
+    })

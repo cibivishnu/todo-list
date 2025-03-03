@@ -6,7 +6,7 @@ export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column('varchar')
+    @Column('varchar', { unique: true})
     name: string;
 
     @OneToMany(() => Todo, (todo) => todo.user)
