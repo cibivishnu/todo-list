@@ -35,7 +35,7 @@ export const statusUpdateValidator = checkSchema({
     }, status: { 
         isString: true, 
         isIn: { 
-            options: statusList, 
+            options: [statusList], 
             errorMessage: 'Invalid status' 
         }, errorMessage: 'Status must be a string'
     }

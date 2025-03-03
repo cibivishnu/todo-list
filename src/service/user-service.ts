@@ -9,16 +9,14 @@ const todoRepo = datasource.getRepository(Todo);
 
 export class UserService {
     async createUser(name: string): Promise<User | ErrorMessage> {
-        try{
-            logger.info('Creating user: ' + name);
-            return await userRepo.save({ name });
-        } catch (error: any) {
+        logger.info('Creating user: ' + name);
+        return await userRepo.save({ name }).catch((error) => {
             if (error.code === 'ER_DUP_ENTRY') {
                 logger.error('User already exists with name: ' + name);
                 return new ErrorMessage(400, 'User already exists');
             }
             throw error;
-        }
+        });
     }
 
     async deleteUser(user: User): Promise<boolean> {

@@ -9,10 +9,10 @@ const todoService = new TodoService();
 
 todoRouter.route('/')
     .get(async (req: Request, res: Response) => {
-        res.send(todoService.getAllTodos(req.body.user));
+        res.send(await todoService.getAllTodos(req.body.user));
     })
     .post(createTodoValidator, handleValidationErrors,  async (req: Request, res: Response) => {
-        res.status(201).send(todoService.createTodo(req.body, req.body.user));
+        res.status(201).send(await todoService.createTodo(req.body, req.body.user));
     })
 
 todoRouter.route('/:id')
@@ -39,4 +39,9 @@ todoRouter.route('/status/:id')
         } else {
             res.status(400).send();
         }
+    })
+
+todoRouter.route('/analytics/data')
+    .get(async(req: Request, res: Response) => {
+        res.send(await todoService.getTodoAnalytics(req.body.user));
     })

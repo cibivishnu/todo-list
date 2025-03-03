@@ -9,7 +9,7 @@ export class Todo {
     @Column('varchar')
     title: string;
 
-    @Column('text')
+    @Column('text', {nullable: true})
     description: string;
 
     @Column('varchar')

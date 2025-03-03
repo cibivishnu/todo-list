@@ -18,7 +18,6 @@ app.use('/user', userRouter)
 app.use(verifyUser)
 app.use('/todo', todoRouter)
 
-
 datasource.initialize().then(() => {
     logger.info('db connected')
     app.listen(PORT, () => {

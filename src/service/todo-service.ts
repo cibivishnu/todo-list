@@ -1,6 +1,7 @@
 import { datasource } from '../config/datasource';
 import { logger } from '../config/logger';
 import { redisClient } from '../config/redis';
+import { TodoAnalytics } from '../dto/todo-analytics';
 import { Todo } from '../modal/todo';
 import { User } from '../modal/user';
 
@@ -8,7 +9,7 @@ const todoRepo = datasource.getRepository(Todo);
 
 export class TodoService {
     // to cache and retrieve a todo
-    async cacheTodo (todo: Todo): Promise<void> {
+    async cacheTodo(todo: Todo): Promise<void> {
         await redisClient.set('todo-' + todo.id, JSON.stringify(todo));
     }
     async getCachedTodo (id: number): Promise<Todo | undefined> {
@@ -34,12 +35,12 @@ export class TodoService {
         if (!todo) {
             return undefined;
         }
+        todo.user = user;
         this.cacheTodo(todo);
         return todo;
     }
 
     // to create a new todo
-    // TODO
     async createTodo (todo: Todo, user: User): Promise<Todo> {
         logger.info('Creating todo')
 
@@ -48,7 +49,7 @@ export class TodoService {
         todo.updatedAt = new Date;
 
         todo.user = user;
-        return await todoRepo.save(todo);
+        return todoRepo.save(todo);
     }
 
     // delete a todo by id
@@ -75,5 +76,16 @@ export class TodoService {
         this.cacheTodo(todo);
         logger.info('Updated todo status => id:' + id + ' status:' + status);
         return true;
+    }
+
+    // get todo analytics
+    async getTodoAnalytics (user: User): Promise<TodoAnalytics> {
+        const pendingTodos = await todoRepo.count({ where: { user, status: 'PENDING' } });
+        const completedTodos = await todoRepo.count({ where: { user, status: 'COMPLETED' } });
+        const inCompleteTodos = await todoRepo.count({ where: { user, status: 'NOT COMPLETED' } });
+        const completionRate = completedTodos / (completedTodos + inCompleteTodos + pendingTodos) * 100;
+        const todoWithNearestDeadline = await todoRepo.findOne({ where:{ user, status: 'PENDING' }, order: { deadline: 'ASC' } });
+
+        return { pendingTodos, completedTodos, inCompleteTodos, completionRate, todoWithNearestDeadline};
     }
 }
