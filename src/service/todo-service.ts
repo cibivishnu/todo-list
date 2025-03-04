@@ -5,6 +5,7 @@ import { ErrorMessage } from '../dto/error-message';
 import { TodoAnalytics } from '../dto/todo-analytics';
 import { Todo } from '../modal/todo';
 import { User } from '../modal/user';
+import { Between, LessThan } from 'typeorm';
 
 const todoRepo = datasource.getRepository(Todo);
 
@@ -63,7 +64,7 @@ export class TodoService {
             return;
         }
         logger.error('Invalid id received to delete => id:' + id)
-        throw new Error('Invalid id received to delete');
+        throw new ErrorMessage(400, 'Invalid id received to delete');
     }
 
     // update todo status by id
@@ -87,6 +88,31 @@ export class TodoService {
         const completionRate = completedTodos / (completedTodos + inCompleteTodos + pendingTodos) * 100;
         const todoWithNearestDeadline = await todoRepo.findOne({ where:{ user, status: 'PENDING' }, order: { deadline: 'ASC' } });
 
-        return { pendingTodos, completedTodos, inCompleteTodos, completionRate, todoWithNearestDeadline};
+        const completedTodosList = await todoRepo.find({ where: { user, status: 'COMPLETED' } });
+        const totalCompletionTime = completedTodosList.reduce((total, todo) => {
+            const completionTime = (todo.updatedAt.getTime() - todo.createdAt.getTime()) / (1000 * 60 * 60 * 24); // in days
+            return total + completionTime;
+        }, 0);
+        const averageCompletionTime = completedTodosList.length ? totalCompletionTime / completedTodosList.length : 0;
+
+        const overdueTodos = await todoRepo.count({ where: { user, status: 'PENDING', deadline: LessThan(new Date()) } });
+
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const todosCreatedLast7Days = await todoRepo.count({ where: { user, createdAt: Between(sevenDaysAgo, new Date()) } });
+
+        const todosCompletedLast7Days = await todoRepo.count({ where: { user, status: 'COMPLETED', updatedAt: Between(sevenDaysAgo, new Date()) } });
+
+        return { 
+            pendingTodos, 
+            completedTodos, 
+            inCompleteTodos, 
+            completionRate, 
+            todoWithNearestDeadline, 
+            averageCompletionTime, 
+            overdueTodos, 
+            todosCreatedLast7Days, 
+            todosCompletedLast7Days 
+        };
     }
 }

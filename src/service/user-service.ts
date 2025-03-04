@@ -16,7 +16,7 @@ export class UserService {
                     logger.error('User already exists with name: ' + name);
                     throw new ErrorMessage(400, 'User already exists');
                 }
-                throw error;
+                throw new ErrorMessage(400, error.code);
             });
     }
 

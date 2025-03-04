@@ -4,8 +4,6 @@ coverage/
 dist/
 logs/
 
-package-lock.json
-
 .env
 .env.local
 .env.development

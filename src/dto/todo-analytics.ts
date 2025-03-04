@@ -6,5 +6,10 @@ export class TodoAnalytics {
     inCompleteTodos: number;
     completionRate: number;
 
+    averageCompletionTime: number;
+    overdueTodos: number;
+    todosCreatedLast7Days: number;
+    todosCompletedLast7Days: number;
+    
     todoWithNearestDeadline: Todo | null;
 }
