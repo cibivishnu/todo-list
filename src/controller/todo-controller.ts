@@ -1,4 +1,4 @@
-import { Request, Response, Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 import { param } from "express-validator";
 import { createTodoValidator, statusUpdateValidator } from "../middleware/todoRequestValidator";
 import { handleValidationErrors } from "../middleware/validationMiddleware";
@@ -16,7 +16,7 @@ todoRouter.route('/')
     })
 
 todoRouter.route('/:id')
-    .get(param('id').isNumeric(), handleValidationErrors, async (req, res) => {
+    .get(param('id').isNumeric(), handleValidationErrors, async (req: Request, res: Response) => {
         const todo = await todoService.getTodoById(parseInt(req.params.id), req.body.user);
         if (todo) {
             res.status(200).send(todo);
@@ -24,24 +24,26 @@ todoRouter.route('/:id')
             res.status(404).send();
         }
     })
-    .delete(param('id').isNumeric(), handleValidationErrors, async(req, res) => {
-        if(await todoService.deleteTodo(parseInt(req.params.id), req.body.user)) {
+    .delete(param('id').isNumeric(), handleValidationErrors, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            await todoService.deleteTodo(parseInt(req.params.id), req.body.user);
             res.status(200).send();
-        } else {
-            res.status(400).send();
+        } catch (error) {
+            next(error);
         }
-    })
+    });
 
 todoRouter.route('/status/:id')
-    .put(statusUpdateValidator, handleValidationErrors, async(req: Request, res: Response) => {
-        if (await todoService.updateTodoStatus(parseInt(req.params.id), req.body.status, req.body.user)) {
+    .put(statusUpdateValidator, handleValidationErrors, async(req: Request, res: Response, next: NextFunction) => {
+        try {
+            await todoService.updateTodoStatus(parseInt(req.params.id), req.body.status, req.body.user);
             res.status(200).send();
-        } else {
-            res.status(400).send();
+        } catch (error) {
+            next(error);
         }
     })
 
 todoRouter.route('/analytics/data')
-    .get(async(req: Request, res: Response) => {
+    .get(async (req: Request, res: Response) => {
         res.send(await todoService.getTodoAnalytics(req.body.user));
     })

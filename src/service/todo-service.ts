@@ -1,6 +1,8 @@
+import { log } from 'console';
 import { datasource } from '../config/datasource';
 import { logger } from '../config/logger';
 import { redisClient } from '../config/redis';
+import { ErrorMessage } from '../dto/error-message';
 import { TodoAnalytics } from '../dto/todo-analytics';
 import { Todo } from '../modal/todo';
 import { User } from '../modal/user';
@@ -19,7 +21,8 @@ export class TodoService {
 
     // to get all todos of a particular user
     async getAllTodos(user: User): Promise<Todo[]> {
-        return await todoRepo.find({ where: { user } })
+        logger.info('Fetching all todos of user => id:' + user.id)
+        return await todoRepo.find({ where: { user } }); 
     }
 
     // to get a todo by id
@@ -49,33 +52,33 @@ export class TodoService {
         todo.updatedAt = new Date;
 
         todo.user = user;
+        log(todoRepo)
         return todoRepo.save(todo);
     }
 
     // delete a todo by id
-    async deleteTodo (id: number, user: User): Promise<boolean> {
+    async deleteTodo (id: number, user: User): Promise<void> {
         const deleteResult = await todoRepo.delete({ id, user })
         if (deleteResult.affected) {
             redisClient.del('todo-' + id)
             logger.error('Deleted todo => id:' + id)
-            return true;
+            return;
         }
         logger.error('Invalid id received to delete => id:' + id)
-        return false;
+        throw new Error('Invalid id received to delete');
     }
 
     // update todo status by id
-    async updateTodoStatus (id: number, status: string, user: User): Promise<boolean> {
+    async updateTodoStatus (id: number, status: string, user: User): Promise<void> {
         const todo = await this.getTodoById(id, user);
         if (!todo) {
             logger.error('Invalid id received to update status => id:' + id + ' status:' + status)
-            return false;
+            throw new ErrorMessage(400, 'Invalid id received to update status');
         }
         todo.status = status;
         todoRepo.save(todo);
         this.cacheTodo(todo);
         logger.info('Updated todo status => id:' + id + ' status:' + status);
-        return true;
     }
 
     // get todo analytics
