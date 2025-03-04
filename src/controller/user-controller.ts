@@ -1,6 +1,6 @@
 import { Request, Response, Router, NextFunction } from 'express';
-import { createUserValidator } from '../middleware/userRequestValidator';
-import { handleValidationErrors } from '../middleware/validationMiddleware';
+import { createUserValidator } from '../middleware/user-request-validator';
+import { handleValidationErrors } from '../middleware/validation-middleware';
 import { UserService } from '../service/user-service';
 
 export const router = Router();

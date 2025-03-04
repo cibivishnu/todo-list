@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { param } from "express-validator";
-import { createTodoValidator, statusUpdateValidator } from "../middleware/todoRequestValidator";
-import { handleValidationErrors } from "../middleware/validationMiddleware";
+import { createTodoValidator, statusUpdateValidator } from "../middleware/todo-request-validator";
+import { handleValidationErrors } from "../middleware/validation-middleware";
 import { TodoService } from "../service/todo-service";
 
 export const todoRouter = Router();

@@ -8,7 +8,7 @@ import { redisClient } from './config/redis';
 import { todoRouter } from './controller/todo-controller';
 import { router as userRouter } from './controller/user-controller';
 import { errorHandler } from './middleware/error-handler';
-import { verifyUser } from './middleware/verifyUser';
+import { verifyUser } from './middleware/verify-user';
 
 export const app: Express = express();
 const PORT = process.env.PORT || 5000;

@@ -1,4 +1,3 @@
-import { log } from 'console';
 import { datasource } from '../config/datasource';
 import { logger } from '../config/logger';
 import { redisClient } from '../config/redis';
@@ -52,7 +51,6 @@ export class TodoService {
         todo.updatedAt = new Date;
 
         todo.user = user;
-        log(todoRepo)
         return todoRepo.save(todo);
     }
 
