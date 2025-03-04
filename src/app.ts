@@ -5,8 +5,8 @@ import express, { Express } from 'express';
 import { datasource } from './config/datasource';
 import { logger } from './config/logger';
 import { redisClient } from './config/redis';
-import { todoRouter } from './controller/todo-controller';
-import { router as userRouter } from './controller/user-controller';
+import { todoRouter } from './routes/todo-routes';
+import { router as userRouter } from './routes/user-routes';
 import { errorHandler } from './middleware/error-handler';
 import { verifyUser } from './middleware/verify-user';
 
